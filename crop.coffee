@@ -38,14 +38,29 @@ $.fn.crop = ->
         new_h = h + e.clientY-mouse_pos[1]
 
         if $handler.is(".sq-1, .sq-4, .sq-6")
-          new_w = w - e.clientX-mouse_pos[0]
+          w_diff = e.clientX-mouse_pos[0]
+          if w_diff < 0
+            new_w = w + Math.abs w_diff
+          else
+            new_w = w - w_diff
+
           css_outer['left'] = pos[0] + e.clientX-mouse_pos[0]
 
-        # qué handlers en x, y & ambos?
-        css = jQuery.extend({ width: new_w, height: new_h }, css) if $handler.is(".sq-1, .sq-3, .sq-6, .sq-8")
-        css = jQuery.extend({ width: new_w }, css) if $handler.is(".sq-4, .sq-5")
-        css = jQuery.extend({ height: new_h }, css) if $handler.is(".sq-2, .sq-7")
+        if $handler.is(".sq-1, .sq-2, .sq-3")
+          h_diff = e.clientY-mouse_pos[1]
+          if h_diff < 0
+            new_h = h + Math.abs h_diff
+          else
+            new_h = h - h_diff
 
+          css_outer['top'] = pos[1] + e.clientY-mouse_pos[1]
+
+        # qué handlers en x, y & ambos?
+        css = { width: new_w, height: new_h } if $handler.is(".sq-1, .sq-3, .sq-6, .sq-8")
+        css = { width: new_w } if $handler.is(".sq-4, .sq-5")
+        css = { height: new_h } if $handler.is(".sq-2, .sq-7")
+
+        console.log css
         $rect_inner.css css
         $rect.css css_outer
       
