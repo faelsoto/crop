@@ -7,26 +7,59 @@ $.fn.crop = ->
 
   $(this).each (el) ->
     pos = []
-    $img = $(this)
-    $img.wrap '<div class="crop">'
-    $crop = $img.closest ".crop"
-    $crop.data('crop-orig-img', $img)
-    $img.clone().attr('class', 'crop-mask').appendTo $crop
-    $img.hide()
+    $img_orig = $(this)
+    $img_orig.wrap '<div class="crop">'
+    $crop = $img_orig.closest ".crop"
+    $crop.data('crop-orig-img', $img_orig)
+    $img = $img_orig.clone().attr('class', 'crop-mask').appendTo $crop
+    $img_orig.hide()
     $overlay = $("<div class='crop-overlay'/>").appendTo $crop
     $rect = $("<div class='crop-rect'/>").appendTo $crop
     $rect_inner = $("<div class='crop-rect-inner'/>").appendTo $rect
     $("<div class='crop-rect-inner-sq sq-#{i}'/>").appendTo $rect_inner for i in [1..8]
 
+    # deshabilitamos drag & drop
+    $crop.find("*").on "mousedown", (e) ->
+      e.preventDefault()
+
+    # mover handlers
+    $rect_inner.find(".crop-rect-inner-sq").on 'mousedown', (e) ->
+      e.stopPropagation()
+      $handler = $(this)
+      pos = [parseInt($rect.css('left'), 10), parseInt($rect.css('top'), 10)]
+      mouse_pos = [e.clientX, e.clientY]
+      w = $rect_inner.width()
+      h = $rect_inner.height()
+      $("html").on 'mousemove.crop', (e) ->
+        css_outer = {}
+        css = {}
+
+        new_w = w + e.clientX-mouse_pos[0]
+        new_h = h + e.clientY-mouse_pos[1]
+
+        if $handler.is(".sq-1, .sq-4, .sq-6")
+          new_w = w - e.clientX-mouse_pos[0]
+          css_outer['left'] = pos[0] + e.clientX-mouse_pos[0]
+
+        # qué handlers en x, y & ambos?
+        css = jQuery.extend({ width: new_w, height: new_h }, css) if $handler.is(".sq-1, .sq-3, .sq-6, .sq-8")
+        css = jQuery.extend({ width: new_w }, css) if $handler.is(".sq-4, .sq-5")
+        css = jQuery.extend({ height: new_h }, css) if $handler.is(".sq-2, .sq-7")
+
+        $rect_inner.css css
+        $rect.css css_outer
+      
+
+    # mover rectángulo
     $rect_inner.on 'mousedown', (e) ->
       pos = [parseInt($rect.css('left'), 10), parseInt($rect.css('top'), 10)]
       mouse_pos = [e.clientX, e.clientY]
       $("html").on 'mousemove.crop', (e) ->
         $rect.css
-          left: pos[0] + e.clientX-mouse_pos[0]
-          top: pos[1] + e.clientY-mouse_pos[1]
+          left: Math.min(Math.max(pos[0] + e.clientX-mouse_pos[0], 0), $img.width() - $rect.outerWidth())
+          top: Math.min(Math.max(pos[1] + e.clientY-mouse_pos[1], 0), $img.height() - $rect.outerHeight())
         
-    $("html").on 'mouseup mouseleave', ->
+    $("html").on 'mouseup', ->
       $(this).off 'mousemove.crop'
 
 estilos = """
