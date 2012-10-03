@@ -6,6 +6,7 @@ $.fn.crop = ->
   $("<style>", { class: 'css-crop' }).text(estilos).appendTo "head" unless $("style.css-crop").size()
 
   $(this).each (el) ->
+    pos = []
     $img = $(this)
     $img.wrap '<div class="crop">'
     $crop = $img.closest ".crop"
@@ -16,6 +17,17 @@ $.fn.crop = ->
     $rect = $("<div class='crop-rect'/>").appendTo $crop
     $rect_inner = $("<div class='crop-rect-inner'/>").appendTo $rect
     $("<div class='crop-rect-inner-sq sq-#{i}'/>").appendTo $rect_inner for i in [1..8]
+
+    $rect_inner.on 'mousedown', (e) ->
+      pos = [parseInt($rect.css('left'), 10), parseInt($rect.css('top'), 10)]
+      mouse_pos = [e.clientX, e.clientY]
+      $("html").on 'mousemove.crop', (e) ->
+        $rect.css
+          left: pos[0] + e.clientX-mouse_pos[0]
+          top: pos[1] + e.clientY-mouse_pos[1]
+        
+    $("html").on 'mouseup mouseleave', ->
+      $(this).off 'mousemove.crop'
 
 estilos = """
 .crop{
@@ -39,6 +51,7 @@ estilos = """
   position: relative;
   width: 100px;
   height: 100px;
+  cursor: move;
 }
 .crop-rect-inner-sq{
   position: absolute;
