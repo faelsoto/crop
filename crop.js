@@ -40,16 +40,35 @@
         w = $rect_inner.width();
         h = $rect_inner.height();
         return $("html").on('mousemove.crop', function(e) {
-          var css, css_inner, new_h, new_w;
+          var css, css_inner, new_h, new_w, x_diff;
           css = {};
           css_inner = {};
           new_w = w + e.clientX - mouse_pos[0];
           new_h = h + e.clientY - mouse_pos[1];
-          if (new_w <= 0 && $handler.is(".sq-3, .sq-5, .sq-8")) {
-            css.left = pos[0] - Math.abs(new_w);
-            css_inner.width = Math.abs(new_w);
-          } else {
-            css_inner.width = new_w;
+          if ($handler.is(".sq-1, .sq-4, .sq-6")) {
+            x_diff = w - e.clientX + mouse_pos[0];
+            if (x_diff > 0) {
+              css.left = pos[0] + new_w - w;
+              css_inner.width = w - e.clientX + mouse_pos[0];
+            } else {
+              css.left = pos[0] + w;
+              css_inner.width = Math.abs(x_diff);
+            }
+          }
+          if ($handler.is(".sq-3, .sq-5, .sq-8")) {
+            if (new_w <= 0) {
+              css.left = pos[0] - Math.abs(new_w);
+              css_inner.width = Math.abs(new_w);
+            } else {
+              css_inner.width = new_w;
+            }
+          }
+          if (css.left < 0) {
+            css.left = 0;
+            css_inner.width = $rect_inner.width();
+          }
+          if (pos[0] + css_inner.width >= $img.width()) {
+            css_inner.width = $img.width() - pos[0] - 2;
           }
           $rect_inner.css(css_inner);
           return $rect.css(css);
