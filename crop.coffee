@@ -62,6 +62,31 @@ $.fn.crop = ->
         if pos[0] + css_inner.width >= $img.width()
           css_inner.width = $img.width()-pos[0]-2
 
+        # height
+        if $handler.is(".sq-1, .sq-2, .sq-3")
+          y_diff = h - e.clientY+mouse_pos[1]
+          if y_diff > 0
+            css.top = pos[1] + new_h - h
+            css_inner.height = h - e.clientY+mouse_pos[1]
+          else
+            css.top = pos[1]+w
+            css_inner.height = Math.abs y_diff
+
+        if $handler.is(".sq-6, .sq-7, .sq-8")
+          if new_h <= 0
+            css.top = pos[1] - Math.abs new_h
+            css_inner.height = Math.abs new_h
+          else
+            css_inner.height = new_h
+
+        # y: límites
+        if css.top < 0
+          css.top = 0
+          css_inner.height = $rect_inner.height()
+
+        if pos[1] + css_inner.height >= $img.height()
+          css_inner.height = $img.height()-pos[1]-2
+
         $rect_inner.css css_inner
         $rect.css css
       
